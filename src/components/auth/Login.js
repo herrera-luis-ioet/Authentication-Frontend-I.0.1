@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Box, Button, TextField, Typography, Container } from '@mui/material';
+import { Box, Button, TextField, Typography, Container, Link } from '@mui/material';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -164,6 +164,14 @@ const Login = () => {
           >
             Sign In
           </Button>
+          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+            <Link component={RouterLink} to="/register" variant="body2">
+              {"Don't have an account? Sign Up"}
+            </Link>
+            <Link component={RouterLink} to="/forgot-password" variant="body2">
+              {"Forgot password?"}
+            </Link>
+          </Box>
         </Box>
       </Box>
     </Container>
