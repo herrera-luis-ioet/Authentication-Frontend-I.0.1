@@ -4,7 +4,6 @@ import { TextField, Button, Paper, Typography, Container, Box } from '@mui/mater
 import { useAuth } from '../../contexts/AuthContext';
 import { ROUTES } from '../../utils/constants';
 
-// PUBLIC_INTERFACE
 const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
@@ -86,94 +85,6 @@ const Login = () => {
                     </Box>
                 </Box>
             </Paper>
-        </Container>
-    );
-};
-
-export default Login;import React, { useState } from 'react';
-import { Box, Button, TextField, Typography, Container, Link } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { ROUTES } from '../../utils/constants';
-
-const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const { login } = useAuth();
-    const navigate = useNavigate();
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await login(email, password);
-            navigate(ROUTES.HOME);
-        } catch (error) {
-            setError('Failed to login. Please check your credentials.');
-        }
-    };
-
-    return (
-        <Container component="main" maxWidth="xs">
-            <Box
-                sx={{
-                    marginTop: 8,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                }}
-            >
-                <Typography component="h1" variant="h5">
-                    Sign in
-                </Typography>
-                {error && (
-                    <Typography color="error" variant="body2">
-                        {error}
-                    </Typography>
-                )}
-                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        id="email"
-                        label="Email Address"
-                        name="email"
-                        autoComplete="email"
-                        autoFocus
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                    <TextField
-                        margin="normal"
-                        required
-                        fullWidth
-                        name="password"
-                        label="Password"
-                        type="password"
-                        id="password"
-                        autoComplete="current-password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <Button
-                        type="submit"
-                        fullWidth
-                        variant="contained"
-                        sx={{ mt: 3, mb: 2 }}
-                    >
-                        Sign In
-                    </Button>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Link href={ROUTES.REGISTER} variant="body2">
-                            {"Don't have an account? Sign Up"}
-                        </Link>
-                        <Link href={ROUTES.FORGOT_PASSWORD} variant="body2">
-                            {"Forgot password?"}
-                        </Link>
-                    </Box>
-                </Box>
-            </Box>
         </Container>
     );
 };
