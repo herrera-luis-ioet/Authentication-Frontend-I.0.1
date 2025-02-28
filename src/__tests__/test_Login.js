@@ -13,13 +13,7 @@ jest.mock('react-router-dom', () => ({
 
 describe('Login Component', () => {
   const renderLogin = () => {
-    return render(
-      <BrowserRouter>
-        <AuthProvider>
-          <Login />
-        </AuthProvider>
-      </BrowserRouter>
-    );
+    return render(<Login />);
   };
 
   beforeEach(() => {
