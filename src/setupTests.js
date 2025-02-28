@@ -1,6 +1,7 @@
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 import '@testing-library/jest-dom';
 import 'jest-fetch-mock';
+import { act } from 'react';
 
 // Enable fetch mocks
 global.fetch = require('jest-fetch-mock');
