@@ -165,10 +165,22 @@ const Login = () => {
             Sign In
           </Button>
           <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-            <Link component={RouterLink} to="/register" variant="body2">
+            <Link 
+              component={RouterLink} 
+              to="/register" 
+              variant="body2"
+              role="link"
+              aria-label="Sign up for a new account"
+            >
               {"Don't have an account? Sign Up"}
             </Link>
-            <Link component={RouterLink} to="/forgot-password" variant="body2">
+            <Link 
+              component={RouterLink} 
+              to="/forgot-password" 
+              variant="body2"
+              role="link"
+              aria-label="Reset your password"
+            >
               {"Forgot password?"}
             </Link>
           </Box>

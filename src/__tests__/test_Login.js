@@ -11,6 +11,17 @@ jest.mock('react-router-dom', () => ({
   useNavigate: () => mockNavigate,
 }));
 
+// Create a custom matcher for checking focus
+expect.extend({
+  toHaveFocus(received) {
+    const pass = received === document.activeElement;
+    return {
+      message: () => `expected element ${pass ? 'not ' : ''}to have focus`,
+      pass,
+    };
+  },
+});
+
 describe('Login Component', () => {
   const renderLogin = () => {
     return render(<Login />);
@@ -81,21 +92,136 @@ describe('Login Component', () => {
     });
   });
 
-  test('navigates to register page when clicking register link', () => {
-    renderLogin();
-    const registerLink = screen.getByText(/don't have an account\? sign up/i);
-    
-    fireEvent.click(registerLink);
-    
-    expect(mockNavigate).toHaveBeenCalledWith('/register');
-  });
+  describe('Navigation Links', () => {
+    let registerLink;
+    let forgotPasswordLink;
 
-  test('navigates to forgot password page when clicking forgot password link', () => {
-    renderLogin();
-    const forgotPasswordLink = screen.getByText(/forgot password\?/i);
-    
-    fireEvent.click(forgotPasswordLink);
-    
-    expect(mockNavigate).toHaveBeenCalledWith('/forgot-password');
+    beforeEach(() => {
+      renderLogin();
+      registerLink = screen.getByText(/don't have an account\? sign up/i);
+      forgotPasswordLink = screen.getByText(/forgot password\?/i);
+    });
+
+    test('renders navigation links correctly', () => {
+      expect(registerLink).toBeInTheDocument();
+      expect(forgotPasswordLink).toBeInTheDocument();
+      expect(registerLink).toHaveAttribute('href', '/register');
+      expect(forgotPasswordLink).toHaveAttribute('href', '/forgot-password');
+    });
+
+    test('navigates to register page when clicking register link', () => {
+      fireEvent.click(registerLink);
+      expect(mockNavigate).toHaveBeenCalledWith('/register');
+    });
+
+    test('navigates to forgot password page when clicking forgot password link', () => {
+      fireEvent.click(forgotPasswordLink);
+      expect(mockNavigate).toHaveBeenCalledWith('/forgot-password');
+    });
+
+    describe('Keyboard Accessibility', () => {
+      test('navigation links are keyboard accessible', async () => {
+        const user = userEvent.setup();
+        
+        // Tab to register link
+        await user.tab(); // email
+        await user.tab(); // password
+        await user.tab(); // submit
+        await user.tab(); // register link
+        expect(registerLink).toHaveFocus();
+        
+        // Activate register link with Enter
+        await user.keyboard('{Enter}');
+        expect(mockNavigate).toHaveBeenCalledWith('/register');
+        
+        // Tab to forgot password link
+        await user.tab();
+        expect(forgotPasswordLink).toHaveFocus();
+        
+        // Activate forgot password link with Space
+        await user.keyboard(' ');
+        expect(mockNavigate).toHaveBeenCalledWith('/forgot-password');
+      });
+
+      test('supports reverse tab navigation', async () => {
+        const user = userEvent.setup();
+        
+        // Focus the last element
+        await user.tab(); // email
+        await user.tab(); // password
+        await user.tab(); // submit
+        await user.tab(); // register
+        await user.tab(); // forgot password
+        expect(forgotPasswordLink).toHaveFocus();
+        
+        // Tab backwards
+        await user.keyboard('{Shift>}{Tab}{/Shift}');
+        expect(registerLink).toHaveFocus();
+      });
+    });
+
+    describe('Accessibility Features', () => {
+      test('navigation links have proper ARIA attributes', () => {
+        expect(registerLink).toHaveAttribute('role', 'link');
+        expect(forgotPasswordLink).toHaveAttribute('role', 'link');
+        expect(registerLink).toHaveAttribute('aria-label', 'Sign up for a new account');
+        expect(forgotPasswordLink).toHaveAttribute('aria-label', 'Reset your password');
+      });
+
+      test('focus management follows logical tab order', async () => {
+        const user = userEvent.setup();
+        const emailInput = screen.getByLabelText(/email/i);
+        const passwordInput = screen.getByLabelText(/password/i);
+        const submitButton = screen.getByRole('button', { name: /sign in/i });
+        
+        // Check initial focus
+        expect(emailInput).toHaveFocus();
+        
+        // Verify tab order
+        await user.tab();
+        expect(passwordInput).toHaveFocus();
+        
+        await user.tab();
+        expect(submitButton).toHaveFocus();
+        
+        await user.tab();
+        expect(registerLink).toHaveFocus();
+        
+        await user.tab();
+        expect(forgotPasswordLink).toHaveFocus();
+      });
+
+      test('focus is trapped within the form', async () => {
+        const user = userEvent.setup();
+        const emailInput = screen.getByLabelText(/email/i);
+        
+        // Tab through all elements
+        await user.tab(); // email
+        await user.tab(); // password
+        await user.tab(); // submit
+        await user.tab(); // register
+        await user.tab(); // forgot password
+        await user.tab(); // should loop back to email
+        
+        expect(emailInput).toHaveFocus();
+      });
+
+      test('focus is preserved after navigation attempt', async () => {
+        const user = userEvent.setup();
+        
+        // Focus the register link
+        await user.tab(); // email
+        await user.tab(); // password
+        await user.tab(); // submit
+        await user.tab(); // register
+        expect(registerLink).toHaveFocus();
+        
+        // Trigger navigation
+        await user.keyboard('{Enter}');
+        
+        // Focus should remain on the link until navigation completes
+        expect(registerLink).toHaveFocus();
+      });
+    });
   });
 });
