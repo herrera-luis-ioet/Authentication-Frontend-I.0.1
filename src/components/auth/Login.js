@@ -1,193 +1,125 @@
 import React, { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Box, Button, TextField, Typography, Container, Link } from '@mui/material';
 
-const Login = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
-  const [formErrors, setFormErrors] = useState({
-    email: '',
-    password: '',
-    general: ''
-  });
-  const { login } = useAuth();
+function Copyright(props) {
+  return (
+    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+      {'Copyright © '}
+      <Link color="inherit" href="https://mui.com/">
+        Your Website
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
+  );
+}
+
+const defaultTheme = createTheme();
+
+export default function SignIn() {
   const navigate = useNavigate();
+  const { login } = useAuth();
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const validateForm = () => {
-    let isValid = true;
-    const errors = {
-      email: '',
-      password: '',
-      general: ''
-    };
-
-    // Email validation
-    if (!formData.email) {
-      errors.email = 'Email is required';
-      isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      errors.email = 'Please enter a valid email address';
-      isValid = false;
-    }
-
-    // Password validation
-    if (!formData.password) {
-      errors.password = 'Password is required';
-      isValid = false;
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-      isValid = false;
-    }
-
-    setFormErrors(errors);
-    return isValid;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    // Clear error when user starts typing
-    if (formErrors[name]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [name]: '',
-        general: ''
-      }));
-    }
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
     
-    // Clear all errors before validation
-    setFormErrors({
-      email: '',
-      password: '',
-      general: ''
-    });
-
-    if (!validateForm()) {
-      return;
-    }
-
     try {
-      await login(formData.email, formData.password);
-      navigate('/dashboard');
-    } catch (err) {
-      setFormErrors(prev => ({
-        ...prev,
-        general: 'Failed to log in. Please check your credentials.'
-      }));
+      setError('');
+      setLoading(true);
+      await login(data.get('email'), data.get('password'));
+      navigate('/');
+    } catch {
+      setError('Failed to sign in');
     }
-  };
+    setLoading(false);
+  }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Typography component="h1" variant="h5">
-          Login
-        </Typography>
-        {formErrors.general && (
-          <Typography 
-            color="error" 
-            role="alert"
-            data-testid="login-error"
-            aria-live="polite"
-            sx={{ mt: 2 }}
-          >
-            {formErrors.general}
-          </Typography>
-        )}
-        <Box 
-          component="form" 
-          onSubmit={handleSubmit} 
-          sx={{ mt: 1 }}
-          noValidate
+    <ThemeProvider theme={defaultTheme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
         >
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            value={formData.email}
-            onChange={handleInputChange}
-            error={!!formErrors.email}
-            helperText={formErrors.email}
-            inputProps={{
-              'data-testid': 'email-input',
-              'aria-label': 'Email Address',
-              'aria-invalid': !!formErrors.email
-            }}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={formData.password}
-            onChange={handleInputChange}
-            error={!!formErrors.password}
-            helperText={formErrors.password}
-            inputProps={{
-              'data-testid': 'password-input',
-              'aria-label': 'Password',
-              'aria-invalid': !!formErrors.password
-            }}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            data-testid="login-submit"
-          >
-            Sign In
-          </Button>
-          <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
-            <Link 
-              component={RouterLink} 
-              to="/register" 
-              variant="body2"
-              role="link"
-              aria-label="Sign up for a new account"
+          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography>
+          {error && <Typography color="error">{error}</Typography>}
+          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              label="Email Address"
+              required
+              fullWidth
+              id="email"
+              name="email"
+              autoComplete="email"
+              autoFocus
+            />
+            <TextField
+              margin="normal"
+              label="Password"
+              required
+              fullWidth
+              name="password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+            />
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+            />
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={loading}
             >
-              {"Don't have an account? Sign Up"}
-            </Link>
-            <Link 
-              component={RouterLink} 
-              to="/forgot-password" 
-              variant="body2"
-              role="link"
-              aria-label="Reset your password"
-            >
-              {"Forgot password?"}
-            </Link>
+              Sign In
+            </Button>
+            <Grid container>
+              <Grid item xs>
+                <Link href="/forgot-password" variant="body2">
+                  Forgot password?
+                </Link>
+              </Grid>
+              <Grid item>
+                <Link href="/register" variant="body2">
+                  {"Don't have an account? Sign Up"}
+                </Link>
+              </Grid>
+            </Grid>
           </Box>
         </Box>
-      </Box>
-    </Container>
+        <Copyright sx={{ mt: 8, mb: 4 }} />
+      </Container>
+    </ThemeProvider>
   );
-};
-
-export default Login;
+}
