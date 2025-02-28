@@ -26,13 +26,15 @@ export const login = async (username, password) => {
 
 // PUBLIC_INTERFACE
 export const register = async (userData) => {
+    const {name: username, password} = userData;
+
     try {
         const response = await fetch(`${API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(userData),
+            body: JSON.stringify({username, password}),
         });
         
         if (!response.ok) {
